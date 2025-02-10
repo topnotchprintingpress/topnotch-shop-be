@@ -31,7 +31,7 @@ urlpatterns = [
     path('api/', include(orders_router.urls)),
 
     # cart
-    path('api/', include(cart_router.urls)),
+    path('api/', include(cart_router.urls)),     
 
     # authentication
     path('api/auth/', include('dj_rest_auth.urls')),
