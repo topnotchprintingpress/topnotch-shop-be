@@ -22,7 +22,7 @@ class DeviceImageInline(admin.TabularInline):
     extra = 3
 
 
-class DeviceFeatureInline(admin.TabularInline):
+class DeviceFeatureInline(admin.StackedInline):
     model = DeviceFeature
     extra = 5
 

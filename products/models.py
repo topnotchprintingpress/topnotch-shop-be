@@ -127,5 +127,6 @@ class DeviceImage(models.Model):
 
 
 class DeviceFeature(models.Model):
-    device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    device = models.ForeignKey(
+        Device, related_name='features', on_delete=models.CASCADE)
     feature = models.CharField(max_length=250, null=True)
