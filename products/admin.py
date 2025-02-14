@@ -1,29 +1,14 @@
 from django.contrib import admin
-from .models import Category, Book, BookImage, Stationery, StationeryImage, LabEquipment, LabImage, Device, DeviceImage, DeviceFeature
+from .models import Category, Product, ProductImage, ProductFeature
 
 
-class BookImageInline(admin.TabularInline):
-    model = BookImage
-    extra = 2
-
-
-class StationeryImageInline(admin.TabularInline):
-    model = StationeryImage
-    extra = 2
-
-
-class LabImageInline(admin.TabularInline):
-    model = LabImage
-    extra = 2
-
-
-class DeviceImageInline(admin.TabularInline):
-    model = DeviceImage
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
     extra = 3
 
 
-class DeviceFeatureInline(admin.StackedInline):
-    model = DeviceFeature
+class ProductFeatureInline(admin.StackedInline):
+    model = ProductFeature
     extra = 5
 
 
@@ -33,62 +18,20 @@ class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Book)
-class BookAdmin(admin.ModelAdmin):
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'price', 'stock')
     list_filter = ('category',)
-    inlines = [BookImageInline]
-    search_fields = ('title', 'author')
+    inlines = [ProductImageInline]
+    search_fields = ('title',)
     prepopulated_fields = {'slug': ('title',)}
 
 
-@admin.register(BookImage)
-class BookImageAdmin(admin.ModelAdmin):
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Stationery)
-class StationeryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock')
-    list_filter = ('category',)
-    inlines = [StationeryImageInline]
-    search_fields = ('name',)
-    prepopulated_fields = {'slug': ('name',)}
-
-
-@admin.register(StationeryImage)
-class StationeryImageAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(LabEquipment)
-class LabEquipmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock')
-    list_filter = ('category',)
-    inlines = [LabImageInline]
-    search_fields = ('name',)
-    prepopulated_fields = {'slug': ('name',)}
-
-
-@admin.register(LabImage)
-class LabImageAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Device)
-class DeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock')
-    list_filter = ('name',)
-    inlines = [DeviceImageInline, DeviceFeatureInline]
-    search_fields = ('name',)
-    prepopulated_fields = {'slug': ('name',)}
-
-
-@admin.register(DeviceImage)
-class DeviceImageAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(DeviceFeature)
-class DeviceFeatureAdmin(admin.ModelAdmin):
+@admin.register(ProductFeature)
+class ProductFeatureAdmin(admin.ModelAdmin):
     pass
