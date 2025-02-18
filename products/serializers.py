@@ -21,7 +21,10 @@ class ProductFeatureSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(source='category.name', read_only=True)
+    catalogue = serializers.CharField(source='category.parent', read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
+    features = ProductFeatureSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product

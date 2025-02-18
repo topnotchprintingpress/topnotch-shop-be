@@ -3,21 +3,21 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
 STATUS = {
-    "DT": "Draft",
-    "PB": "Published",
+    ("DT", "Draft"),
+    ("PB", "Published"),
+}
+
+MAJOR_CATEGORY = {
+    ("Books", "Books"),
+    ("Technology", "Technology"),
+    ("Stationery", "Stationery"),
+    ("Lab Equipment", "Lab Equipment")
 }
 
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
-    parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name='children'
-    )
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -30,11 +30,14 @@ class Product(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    main_category = models.CharField(
+        max_length=50, null=True, choices=MAJOR_CATEGORY)
     category = models.ForeignKey(
-        Category, on_delete=models.CASCADE, related_name='products')
+        Category, on_delete=models.CASCADE)
     stock = models.PositiveIntegerField(default=0)
     discount = models.IntegerField(null=True, blank=True)
     featured = models.BooleanField(null=True, default=False, blank=True)
+    best_seller = models.BooleanField(null=True, default=False, blank=True)
     status = models.CharField(max_length=2, choices=STATUS, default="DT")
     # For SEO-friendly URLs
     slug = models.SlugField(max_length=200, unique=True)
@@ -49,7 +52,8 @@ class Product(models.Model):
 
 
 class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='products/', null=True)
 
 
