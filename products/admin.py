@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage, ProductFeature
+from .models import Category, Product, ProductImage, ProductFeature, Banner
 
 
 class ProductImageInline(admin.TabularInline):
@@ -35,3 +35,8 @@ class ProductImageAdmin(admin.ModelAdmin):
 @admin.register(ProductFeature)
 class ProductFeatureAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ('title', 'position', 'is_active')

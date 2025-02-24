@@ -61,3 +61,22 @@ class ProductFeature(models.Model):
     product = models.ForeignKey(
         Product, related_name='features', on_delete=models.CASCADE)
     feature = models.CharField(max_length=250, null=True, blank=True)
+
+
+class Banner(models.Model):
+    POSITION_CHOICES = [
+        ('top', 'Top Banner'),
+        ('middle', 'Middle Banner'),
+        ('bottom', 'Bottom Banner'),
+    ]
+
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='banners/')
+    link = models.URLField(blank=True, null=True)
+    position = models.CharField(max_length=50, choices=POSITION_CHOICES)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title

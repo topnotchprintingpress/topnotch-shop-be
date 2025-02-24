@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from .models import Category, Product
+from .models import Category, Product, Banner
 from django_filters.rest_framework import DjangoFilterBackend
-from .serializers import CategorySerializer, ProductSerializer
+from .serializers import CategorySerializer, ProductSerializer, BannerSerializer
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -21,4 +21,16 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         if main_category:
             queryset = queryset.filter(main_category=main_category)
+        return queryset
+
+
+class BannerViewSet(viewsets.ModelViewSet):
+    queryset = Banner.objects.all()
+    serializer_class = BannerSerializer
+
+    def get_queryset(self):
+        position = self.request.query_params.get('position', None)
+        queryset = self.queryset.filter(is_active=True)
+        if position:
+            queryset = self.queryset.filter(position=position)
         return queryset
