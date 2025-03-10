@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Product
 from .serializers import CartSerializer, CartItemSerializer
+from rest_framework.decorators import action
 
 
 class CartViewSet(viewsets.ModelViewSet):
@@ -29,11 +30,48 @@ class CartItemViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         cart, _ = Cart.objects.get_or_create(user=request.user)
-        data = request.data.copy()
-        data['cart'] = cart.id
+        product_id = request.data.get('product')
 
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        # Ensure product exists
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        quantity = int(request.data.get('quantity', 1))
+
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=cart, product_id=product_id)
+
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+            return Response(self.get_serializer(cart_item).data, status=status.HTTP_200_OK)
+
+        return Response(self.get_serializer(cart_item).data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        cart_item = self.get_object()
+        cart_item.delete()
+        return Response({'message': 'Item removed from cart'}, status=status.HTTP_204_NO_CONTENT)
+
+    def partial_update(self, request, *args, **kwargs):
+        print("Received data in Django:", request.data)  # Debugging line
+        cart_item = self.get_object()
+        quantity = request.data.get('quantity')
+
+        if quantity is None:
+            return Response({"error": "Quantity is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            new_quantity = int(quantity)
+        except ValueError:
+            return Response({"error": "Invalid quantity"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new_quantity <= 0:
+            cart_item.delete()
+            return Response({'message': 'Item removed from cart'}, status=status.HTTP_204_NO_CONTENT)
+
+        cart_item.quantity = new_quantity
+        cart_item.save()
+        return Response(self.get_serializer(cart_item).data, status=status.HTTP_200_OK)

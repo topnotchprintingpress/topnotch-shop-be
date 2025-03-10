@@ -6,6 +6,7 @@ from django.conf import settings
 from products.urls import router as products_router
 from orders.urls import router as orders_router
 from cart.urls import router as cart_router
+from payments.urls import router as payment_router
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -23,6 +24,10 @@ urlpatterns = [
 
     # cart
     path('api/', include(cart_router.urls)),
+
+    # payment
+    path('api/', include(payment_router.urls)),
+    path('', include('payments.urls')),
 
     # authentication
     path('accounts/', include('allauth.urls')),

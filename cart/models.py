@@ -11,7 +11,7 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Cart for {self.user.email}"
+        return f"Cart for [{self.user.username}]"
 
     @property
     def total_price(self):
@@ -22,7 +22,7 @@ class CartItem(models.Model):
     cart = models.ForeignKey(
         Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, null=True, blank=True)
+        Product, on_delete=models.CASCADE, null=True)
     quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):

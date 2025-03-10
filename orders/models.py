@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from products.models import Product
+from payments.models import ShippingAddress
 
 
 class Order(models.Model):
@@ -20,6 +21,8 @@ class Order(models.Model):
         max_length=20, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    shipping_address = models.ForeignKey(
+        ShippingAddress, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.email}"

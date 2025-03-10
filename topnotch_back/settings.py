@@ -28,6 +28,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 
+
+# PAYSTACK
+PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -48,6 +53,7 @@ INSTALLED_APPS = [
     'products',
     'orders',
     'cart',
+    'payments',
 
     # Third-party apps
     'rest_framework',
@@ -62,6 +68,7 @@ INSTALLED_APPS = [
     'storages',
     'django_filters',
     'rest_framework_simplejwt',
+    'django_extensions',
 
 
 ]
@@ -139,7 +146,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Django REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
 }
 
@@ -147,6 +155,8 @@ REST_FRAMEWORK = {
 REST_AUTH = {
     'USE_JWT': True,
     'JWT_AUTH_COOKIE': 'jwt-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
+    "JWT_AUTH_HTTPONLY": False,
 }
 
 # SimpleJWT settings
@@ -190,7 +200,7 @@ CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1', "http://localhost:3000",
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 
 
 # Internationalization
@@ -198,7 +208,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 

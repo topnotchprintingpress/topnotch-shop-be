@@ -13,7 +13,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['best_seller']
+    filterset_fields = ['best_seller', 'slug']
 
     def get_queryset(self):
         queryset = self.queryset.filter(status="PB")
