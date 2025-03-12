@@ -1,3 +1,4 @@
+import os
 import requests
 import uuid
 from django.shortcuts import render, get_object_or_404
@@ -9,12 +10,18 @@ from rest_framework.permissions import IsAuthenticated
 from .models import PaymentHistory
 from orders.models import Order, OrderItem
 from cart.models import Cart
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.conf import settings
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.contrib.auth.models import User
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
 
 
 class ShippingViewSet(viewsets.ModelViewSet):
@@ -130,26 +137,26 @@ def process_payment(request):
             return JsonResponse({'status': 'error', 'message': 'No shipping address found'}, status=400)
 
         try:
-            # ✅ Create the order only ONCE
+            # Create the order only ONCE
             order = Order.objects.create(
                 user=user,
                 total_price=amount_paid,
-                shipping_address=shipping_address
+                shipping_address=shipping_address,
+                order_reference=reference,
+                status="PROCESSING"
+
             )
 
-            # ✅ Attach order items properly
+            # Attach order items properly
             for item in cart.items.all():
                 OrderItem.objects.create(
                     order=order, product=item.product, quantity=item.quantity, price=item.product.price
                 )
 
-            print(f"Order successfully created: {order.id}")
-
         except Exception as e:
-            print(f"Order creation failed: {str(e)}")
             return JsonResponse({'status': 'error', 'message': 'Order creation failed'}, status=500)
 
-        # ✅ Save payment history
+        # Save payment history
         PaymentHistory.objects.create(
             user=user,
             amount_paid=order.total_price,
@@ -157,10 +164,107 @@ def process_payment(request):
             payment_date=timezone.now()
         )
 
-        # ✅ Clear cart after successful payment
+        # Clear cart after successful payment
         cart.items.all().delete()
         cart.delete()
 
         return JsonResponse({'status': 'success', 'message': 'Payment verified, order is processing.'})
 
     return JsonResponse({'status': 'error', 'message': 'Payment verification failed'}, status=400)
+
+
+def generate_invoice(request, order_id, order_reference):
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found", status=404)
+
+    customer_name = f"{order.shipping_address.first_name}{order.shipping_address.last_name}".replace(
+        " ", "")
+    order_date = order.created_at.strftime("%Y%m%d")
+    file_name = f"Invoice_{order_reference}_{customer_name}_{order_date}.pdf"
+
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{file_name}"'
+
+    # Create PDF document
+    doc = SimpleDocTemplate(response, pagesize=letter)
+    styles = getSampleStyleSheet()
+    elements = []
+
+    # === BRAND COLORS ===
+    PAGE_BG_COLOR = "#FFFCF7"  # Light cream background
+    HEADER_BG_COLOR = "#2B0909"  # Dark maroon for headers
+
+    # === ADD COMPANY LOGO ===
+    try:
+        # Path to the logo in your static folder
+        logo_path = os.path.join(
+            settings.BASE_DIR, 'products', 'static', 'products', 'images', 'Logo1.png')
+        logo = Image(logo_path, width=2 * inch, height=1 * inch)
+        elements.append(logo)
+    except Exception:
+        # Fallback if logo is missing
+        elements.append(Paragraph("<b>Company Name</b>", styles["Title"]))
+
+    elements.append(Spacer(1, 0.2 * inch))
+
+    # === INVOICE TITLE ===
+    elements.append(
+        Paragraph(f"Invoice for Order Reference No: {order.order_reference}", styles["Title"]))
+    elements.append(Spacer(1, 0.3 * inch))
+
+    # === CUSTOMER & ORDER DETAILS ===
+    customer_info = f"""
+    <b>Order Date:</b> {order.created_at.strftime('%Y-%m-%d %H:%M')}<br/>
+    <b>Customer:</b> {order.shipping_address.first_name} {order.shipping_address.last_name}<br/>
+    <b>Address:</b> {order.shipping_address.street_address}, {order.shipping_address.city}, {order.shipping_address.country}<br/>
+    <b>Phone:</b> {order.shipping_address.phone_number if order.shipping_address.phone_number else 'N/A'}<br/>
+    """
+    elements.append(Paragraph(customer_info, styles["Normal"]))
+    elements.append(Spacer(1, 0.3 * inch))
+
+    # === TABLE HEADER ===
+    data = [["Item", "Quantity", "Unit Price (KES)", "Total (KES)"]]
+
+    # === ADD ORDER ITEMS ===
+    for item in order.items.all():
+        product_title = Paragraph(
+            item.product.title, styles["Normal"])  # Wrap text
+        quantity = item.quantity
+        price = f"{item.product.price:,.2f}"  # Format price
+        # Calculate subtotal
+        subtotal = f"{item.quantity * item.product.price:,.2f}"
+
+        data.append([product_title, quantity, price, subtotal])
+
+    # === ADD TOTAL ROW ===
+    data.append(["", "", Paragraph("<b>Grand Total:</b>", styles["Normal"]),
+                Paragraph(f"<b>{order.total_price:,.2f} KES</b>", styles["Normal"])])
+
+    # === CREATE STYLED TABLE ===
+    table = Table(data, colWidths=[3 * inch, 1 * inch, 1.5 * inch, 1.5 * inch])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0),
+         colors.HexColor(HEADER_BG_COLOR)),  # Header color
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),  # White text in header
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 1, colors.black),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
+        ("TOPPADDING", (0, 0), (-1, 0), 10),
+        # Light beige for Grand Total row
+        ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#DDD2C0")),
+    ]))
+
+    elements.append(table)
+    elements.append(Spacer(1, 0.5 * inch))
+
+    # === FOOTER NOTE ===
+    elements.append(
+        Paragraph("<i>Thank you for shopping with us!</i>", styles["Italic"]))
+
+    # === BUILD PDF ===
+    doc.build(elements)
+    return response
