@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from .models import Category, Product, Banner
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import CategorySerializer, ProductSerializer, BannerSerializer
+from django.db.models import Q
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -18,9 +19,14 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset.filter(status="PB")
         main_category = self.request.query_params.get('main_category', None)
+        search_query = self.request.query_params.get('search')
 
         if main_category:
             queryset = queryset.filter(main_category=main_category)
+
+        if search_query:
+            queryset = queryset.filter(Q(title__icontains=search_query) | Q(
+                description__icontains=search_query))
         return queryset
 
 
