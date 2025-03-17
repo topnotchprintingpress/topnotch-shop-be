@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    pagination_class = None
 
     def get_queryset(self):
         # Only allow users to view their own orders

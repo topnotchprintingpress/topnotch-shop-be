@@ -28,6 +28,7 @@ class ShippingViewSet(viewsets.ModelViewSet):
     queryset = ShippingAddress.objects.all()
     serializer_class = ShippingSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return ShippingAddress.objects.filter(user=self.request.user)
