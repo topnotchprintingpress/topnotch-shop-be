@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -49,6 +50,13 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_discounted_price(self):
+        if self.discount and self.discount > 0:
+            discount_amount = (Decimal(self.discount) /
+                               Decimal(100)) * self.price
+            return round(self.price - discount_amount, 2)
+        return self.price
 
 
 class ProductImage(models.Model):

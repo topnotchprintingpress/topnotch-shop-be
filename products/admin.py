@@ -22,7 +22,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'price', 'stock')
     list_filter = ('category',)
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ProductFeatureInline]
     search_fields = ('title',)
     prepopulated_fields = {'slug': ('title',)}
 

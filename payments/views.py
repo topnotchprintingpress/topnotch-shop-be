@@ -40,28 +40,36 @@ class ShippingViewSet(viewsets.ModelViewSet):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def submit_payment(request):
-    data = request.data
     user = request.user
     email = user.email
-    amount = float(request.data.get("amount", 0)) * 100
-
-    if amount <= 0:
-        return JsonResponse({"status": "error", "message": "Invalid amount"}, status=400)
 
     cart = Cart.objects.filter(user=user).first()
     if not cart or not cart.items.exists():
         return JsonResponse({"status": "error", "message": "Cart is empty"}, status=400)
 
-    # Store cart details in metadata
+    # Apply discounts and calculate the correct amount
     cart_items = [
-        {"product": item.product.title, "quantity": item.quantity,
-            "price": float(item.product.price)}
+        {
+            "product": item.product.title,
+            "quantity": item.quantity,
+            "original_price": float(item.product.price),
+            "discounted_price": float(item.product.get_discounted_price()),
+        }
         for item in cart.items.all()
     ]
 
-    shipping_address = ShippingAddress.objects.filter(user=user).first()
+    # Correct total amount with discounts applied
+    amount = sum(
+        item["quantity"] * item["discounted_price"]
+        for item in cart_items
+    ) * 100  # Convert to cents for Paystack
 
-    if shipping_address:  # Ensure it's not None
+    if amount <= 0:
+        return JsonResponse({"status": "error", "message": "Invalid amount"}, status=400)
+
+    shipping_address = ShippingAddress.objects.filter(user=user).first()
+    shipping = None
+    if shipping_address:
         shipping = {
             "first_name": shipping_address.first_name,
             "last_name": shipping_address.last_name,
@@ -73,8 +81,6 @@ def submit_payment(request):
             "postal_code": shipping_address.postal_code,
             "phone_number": shipping_address.phone_number,
         }
-    else:
-        shipping = None  # Handle case where user has no shipping address
 
     ref = str(uuid.uuid4())
 
@@ -90,6 +96,7 @@ def submit_payment(request):
         "callback_url": "http://localhost:3000/payment/success",
     }
     url = "https://api.paystack.co/transaction/initialize"
+
     try:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()  # Raise an exception for bad responses
@@ -138,10 +145,14 @@ def process_payment(request):
             return JsonResponse({'status': 'error', 'message': 'No shipping address found'}, status=400)
 
         try:
+            total_price = sum(
+                item.quantity * item.product.get_discounted_price()
+                for item in cart.items.all()
+            )
             # Create the order only ONCE
             order = Order.objects.create(
                 user=user,
-                total_price=amount_paid,
+                total_price=total_price,
                 shipping_address=shipping_address,
                 order_reference=reference,
                 status="PROCESSING"
@@ -150,8 +161,9 @@ def process_payment(request):
 
             # Attach order items properly
             for item in cart.items.all():
+                discounted_price = item.product.get_discounted_price()
                 OrderItem.objects.create(
-                    order=order, product=item.product, quantity=item.quantity, price=item.product.price
+                    order=order, product=item.product, quantity=item.quantity, price=discounted_price
                 )
 
         except Exception as e:
@@ -233,9 +245,9 @@ def generate_invoice(request, order_id, order_reference):
         product_title = Paragraph(
             item.product.title, styles["Normal"])  # Wrap text
         quantity = item.quantity
-        price = f"{item.product.price:,.2f}"  # Format price
+        price = f"{item.product.get_discounted_price():,.2f}"  # Format price
         # Calculate subtotal
-        subtotal = f"{item.quantity * item.product.price:,.2f}"
+        subtotal = f"{item.quantity * item.product.get_discounted_price():,.2f}"
 
         data.append([product_title, quantity, price, subtotal])
 
