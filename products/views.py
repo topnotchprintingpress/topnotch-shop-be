@@ -3,6 +3,7 @@ from .models import Category, Product, Banner
 from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import CategorySerializer, ProductSerializer, BannerSerializer
 from django.db.models import Q
+from .filters import ProductFilter
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -11,13 +12,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filterset_class = ProductFilter
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['best_seller', 'slug']
+    # filterset_fields = ['best_seller', 'slug']
 
     def get_queryset(self):
-        queryset = self.queryset.filter(status="PB")
+        queryset = Product.objects.filter(status="PB").order_by('-created_at')
         main_category = self.request.query_params.get('main_category', None)
         search_query = self.request.query_params.get('search')
 
