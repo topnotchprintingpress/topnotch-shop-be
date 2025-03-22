@@ -4,6 +4,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .serializers import CategorySerializer, ProductSerializer, BannerSerializer
 from django.db.models import Q
 from .filters import ProductFilter
+from django.db.models import F, ExpressionWrapper, DecimalField, Value
+from django.db.models.functions import Coalesce
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -21,19 +23,64 @@ class ProductViewSet(viewsets.ModelViewSet):
         queryset = Product.objects.filter(status="PB").order_by('-created_at')
         main_category = self.request.query_params.get('main_category', None)
         search_query = self.request.query_params.get('search')
+        min_price = self.request.query_params.get("min_price", None)
+        max_price = self.request.query_params.get("max_price", None)
+        is_best_seller = self.request.query_params.get("is_best_seller", None)
+        is_new_arrival = self.request.query_params.get("is_new_arrival", None)
+        is_discounted = self.request.query_params.get("is_discounted", None)
 
+        print(
+            f"Received params -> main_category: {main_category}, search: {search_query}, min_price: {min_price}, max_price: {max_price}, is_best_seller: {is_best_seller}, is_new_arrival: {is_new_arrival}, is_discounted: {is_discounted}")
+
+        # If is_new_arrival is set, return all products ordered by created_at (ignore filters)
+        if is_new_arrival:
+            return queryset
+
+        # Apply filters normally when is_new_arrival is not set
         if main_category:
-            queryset = queryset.filter(main_category=main_category)
+            queryset = queryset.filter(main_category__iexact=main_category)
 
         if search_query:
-            queryset = queryset.filter(Q(title__icontains=search_query) | Q(
-                description__icontains=search_query))
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | Q(
+                    description__icontains=search_query)
+            )
+
+        if is_best_seller:
+            queryset = queryset.filter(best_seller=True)
+
+        if is_discounted:
+            queryset = queryset.filter(discount__gt=0)
+
+        queryset = queryset.annotate(
+            final_price=ExpressionWrapper(
+                F('price') - Coalesce(F('price') * F('discount') / 100, Value(0)),
+                output_field=DecimalField()
+            )
+        )
+
+        # Convert price filters to numbers before using them
+        try:
+            if min_price is not None:
+                min_price = float(min_price)
+                queryset = queryset.filter(final_price__gte=min_price)
+
+            if max_price is not None:
+                max_price = float(max_price)
+                queryset = queryset.filter(final_price__lte=max_price)
+
+        except ValueError:
+            print("Invalid min_price or max_price value received")  # Debugging
+
+        print(f"Filtered Queryset: {queryset}")  # Debugging
+
         return queryset
 
 
 class BannerViewSet(viewsets.ModelViewSet):
     queryset = Banner.objects.all()
     serializer_class = BannerSerializer
+    pagination_class = None
 
     def get_queryset(self):
         position = self.request.query_params.get('position', None)
