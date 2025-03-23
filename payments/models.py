@@ -22,6 +22,7 @@ class ShippingAddress(models.Model):
         User, on_delete=models.CASCADE, related_name='shipping_addresses')
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    email = models.EmailField(null=True)
     street_address = models.CharField(max_length=255)
     apartment = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100)

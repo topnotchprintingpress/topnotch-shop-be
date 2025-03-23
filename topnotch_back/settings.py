@@ -91,7 +91,7 @@ ROOT_URLCONF = 'topnotch_back.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -177,11 +177,60 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# storage settings
+# AWS S3 Settings
+# Storage settings for Django >= 4.2
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+            "endpoint_url": env("AWS_S3_ENDPOINT_URL"),
+            "access_key": env("AWS_ACCESS_KEY_ID"),
+            "secret_key": env("AWS_SECRET_ACCESS_KEY"),
+            "region_name": env("AWS_S3_REGION_NAME"),
+            "default_acl": "public-read",
+            "querystring_auth": False,
+            "file_overwrite": False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+            "endpoint_url": env("AWS_S3_ENDPOINT_URL"),
+            "access_key": env("AWS_ACCESS_KEY_ID"),
+            "secret_key": env("AWS_SECRET_ACCESS_KEY"),
+            "region_name": env("AWS_S3_REGION_NAME"),
+            "default_acl": "public-read",
+            "querystring_auth": False,
+            "location": "static",
+        },
+    },
+}
+
+# Base URL for static and media files
+STATIC_URL = f'https://{env("AWS_STORAGE_BUCKET_NAME")}.{env("AWS_S3_ENDPOINT_URL").split("//")[1]}/static/'
+MEDIA_URL = f'https://{env("AWS_STORAGE_BUCKET_NAME")}.{env("AWS_S3_ENDPOINT_URL").split("//")[1]}/media/'
+
+# Local directories (optional, for development)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Redirect URLs
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 SITE_ID = 4
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# EMAIL SETUP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env('BREVO_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('BREVO_MASTER_PASSWORD')
+DEFAULT_FROM_EMAIL = env('BREVO_FROM_EMAIL')
+
 # Base URL for the frontend
 FRONTEND_URL = 'http://localhost:3000'
 
@@ -201,6 +250,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
 
 # CORS settings (allow your Next.js frontend)
 CORS_ALLOW_CREDENTIALS = True
@@ -255,11 +305,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_URL = 'static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = 'media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Default primary key field type

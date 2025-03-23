@@ -29,9 +29,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         is_new_arrival = self.request.query_params.get("is_new_arrival", None)
         is_discounted = self.request.query_params.get("is_discounted", None)
 
-        print(
-            f"Received params -> main_category: {main_category}, search: {search_query}, min_price: {min_price}, max_price: {max_price}, is_best_seller: {is_best_seller}, is_new_arrival: {is_new_arrival}, is_discounted: {is_discounted}")
-
         # If is_new_arrival is set, return all products ordered by created_at (ignore filters)
         if is_new_arrival:
             return queryset
@@ -71,8 +68,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         except ValueError:
             print("Invalid min_price or max_price value received")  # Debugging
-
-        print(f"Filtered Queryset: {queryset}")  # Debugging
 
         return queryset
 
