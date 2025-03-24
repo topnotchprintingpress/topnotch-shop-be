@@ -39,4 +39,4 @@ class ProductFeatureAdmin(admin.ModelAdmin):
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ('title', 'position', 'is_active')
+    list_display = ('title', 'link', 'is_active')

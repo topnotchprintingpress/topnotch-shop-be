@@ -34,4 +34,4 @@ class ProductSerializer(serializers.ModelSerializer):
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = ['id', 'title', 'image', 'link', 'position', 'is_active']
+        fields = ['id', 'title', 'image', 'link', 'is_active']

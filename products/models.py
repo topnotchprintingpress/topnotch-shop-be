@@ -72,16 +72,9 @@ class ProductFeature(models.Model):
 
 
 class Banner(models.Model):
-    POSITION_CHOICES = [
-        ('top', 'Top Banner'),
-        ('middle', 'Middle Banner'),
-        ('bottom', 'Bottom Banner'),
-    ]
-
     title = models.CharField(max_length=255)
     image = models.ImageField(upload_to='banners/')
-    link = models.URLField(blank=True, null=True)
-    position = models.CharField(max_length=50, choices=POSITION_CHOICES)
+    link = models.CharField(null=True, max_length=255)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,6 +1,7 @@
 import os
 import requests
 import uuid
+import json
 from django.shortcuts import render, get_object_or_404
 from .serializers import ShippingSerializer
 from .models import ShippingAddress
@@ -51,6 +52,17 @@ class ShippingViewSet(viewsets.ModelViewSet):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def submit_payment(request):
+    data = json.loads(request.body)
+    amount = data.get("amount")
+
+    if not amount:
+        return JsonResponse({"status": "error", "message": "Amount is required"}, status=400)
+
+    try:
+        amount = int(amount) * 100  # Ensure amount is an integer
+    except ValueError:
+        return JsonResponse({"status": "error", "message": "Invalid amount format"}, status=400)
+
     user = request.user
     email = user.email
 
@@ -68,15 +80,6 @@ def submit_payment(request):
         }
         for item in cart.items.all()
     ]
-
-    # Correct total amount with discounts applied
-    amount = sum(
-        item["quantity"] * item["discounted_price"]
-        for item in cart_items
-    ) * 100  # Convert to cents for Paystack
-
-    if amount <= 0:
-        return JsonResponse({"status": "error", "message": "Invalid amount"}, status=400)
 
     shipping_address = ShippingAddress.objects.filter(user=user).first()
     shipping = None
@@ -103,11 +106,12 @@ def submit_payment(request):
     payload = {
         "email": email,
         "amount": amount,
-        "metadata": {"user": email, "cart_items": cart_items},
-        "shipping_address": shipping,
+        "metadata": {"user": email, "cart_items": cart_items,   "shipping_address": shipping
+                     },
         "callback_url": "http://localhost:3000/payment/success",
     }
     url = "https://api.paystack.co/transaction/initialize"
+    print("Payload sent to Paystack:", payload)
 
     try:
         response = requests.post(url, headers=headers, json=payload)
