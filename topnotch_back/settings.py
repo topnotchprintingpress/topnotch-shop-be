@@ -34,10 +34,11 @@ PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['topnotchprintingpress.com',
-                 'www.topnotchprintingpress.com', 'localhost', 'http://*.127.0.0.1', '127.0.0.1']
+# ALLOWED_HOSTS = ['topnotchprintingpress.com',
+#                  'www.topnotchprintingpress.com', 'localhost', 'http://*.127.0.0.1', '127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -280,7 +281,6 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "DELETE",
 ]
-SECURE_SSL_REDIRECT = True
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1', "http://localhost:3000",
