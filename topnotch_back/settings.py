@@ -36,9 +36,8 @@ PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['topnotchprintingpress.com',
-#                  'www.topnotchprintingpress.com', 'localhost', 'http://*.127.0.0.1', '127.0.0.1']
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['api.topnotchprintingpress.com/',
+                 'www.api.topnotchprintingpress.com', 'localhost', 'http://*.127.0.0.1', '127.0.0.1']
 
 
 # Application definition
