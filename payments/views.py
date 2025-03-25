@@ -23,6 +23,9 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 
 class ShippingViewSet(viewsets.ModelViewSet):
@@ -182,6 +185,23 @@ def process_payment(request):
                     order=order, product=item.product, quantity=item.quantity, price=discounted_price
                 )
 
+            # Send confirmation email to the user
+            subject = "Your Order Confirmation"
+            html_message = render_to_string('order_confirmation.html', {
+                'user': user,
+                'order': order,
+                'order_items': order.items.all(),
+                'total_price': amount_paid,
+                'shipping_address': shipping_address
+            })
+            # Fallback for non-HTML email clients
+            plain_message = strip_tags(html_message)
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to_email = user.email
+
+            send_mail(subject, plain_message, from_email, [
+                      to_email], html_message=html_message)
+
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': 'Order creation failed'}, status=500)
 
@@ -257,19 +277,38 @@ def generate_invoice(request, order_id, order_reference):
     data = [["Item", "Quantity", "Unit Price (KES)", "Total (KES)"]]
 
     # === ADD ORDER ITEMS ===
+    total_quantity_books = 0  # Track total quantity of books
+    total_price = 0  # Track total price of all items
     for item in order.items.all():
         product_title = Paragraph(
             item.product.title, styles["Normal"])  # Wrap text
         quantity = item.quantity
         price = f"{item.product.get_discounted_price():,.2f}"  # Format price
-        # Calculate subtotal
-        subtotal = f"{item.quantity * item.product.get_discounted_price():,.2f}"
+        subtotal = item.quantity * item.product.get_discounted_price()  # Calculate subtotal
+        total_price += subtotal  # Add to total price
 
-        data.append([product_title, quantity, price, subtotal])
+        # Check if the product is a book
+        if item.product.main_category == "Books":
+            total_quantity_books += quantity  # Add to total quantity of books
+
+        data.append([product_title, quantity, price, f"{subtotal:,.2f}"])
+
+    # === SHIPPING COST LOGIC ===
+    shipping_cost = 200  # Default shipping cost
+    if total_quantity_books > 10:
+        shipping_cost = 0  # Free shipping for more than 10 books
+
+    # Add shipping cost to the total price
+    grand_total = total_price + shipping_cost
+
+    # === ADD SHIPPING ROW TO TABLE ===
+    shipping_text = "<b>Free Shipping (Promotion)</b>" if shipping_cost == 0 else "<b>Shipping Cost:</b>"
+    data.append(["", "", Paragraph(shipping_text, styles["Normal"]),
+                Paragraph(f"<b>{shipping_cost:,.2f} KES</b>", styles["Normal"])])
 
     # === ADD TOTAL ROW ===
     data.append(["", "", Paragraph("<b>Grand Total:</b>", styles["Normal"]),
-                Paragraph(f"<b>{order.total_price:,.2f} KES</b>", styles["Normal"])])
+                Paragraph(f"<b>{grand_total:,.2f} KES</b>", styles["Normal"])])
 
     # === CREATE STYLED TABLE ===
     table = Table(data, colWidths=[3 * inch, 1 * inch, 1.5 * inch, 1.5 * inch])

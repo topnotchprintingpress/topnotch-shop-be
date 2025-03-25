@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% blocktrans with site_name=current_site.name %}Hello from Topnotch!{% endblocktrans %}
+
+{% block content %}{% endblock content %}
+
+{% block footer %}{% blocktrans with site_name=current_site.name %}This email was sent by Topnotch. If you have any questions, please contact us.{% endblocktrans %}{% endblock footer %}{% endautoescape %}
+
