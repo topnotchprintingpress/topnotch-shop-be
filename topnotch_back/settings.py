@@ -37,7 +37,7 @@ PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['topnotchprintingpress.com',
-                 'www.topnotchprintingpress.com', 'localhost']
+                 'www.topnotchprintingpress.com', 'localhost', 'http://*.127.0.0.1', '127.0.0.1']
 
 
 # Application definition
@@ -280,10 +280,11 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "DELETE",
 ]
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
+SECURE_SSL_REDIRECT = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1', "http://localhost:3000",
-                        'http://127.0.0.1:3000', 'http://192.168.100:3000']
+                        'http://127.0.0.1:3000', 'http://192.168.100:3000', 'http://topnotchprintingpress.com']
 # Allauth settings
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -317,3 +318,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# SECRET_KEY="django-insecure-7a9xp0f9@-#0*2$w56k!ojstvlc2*b#470%2y_=o1pq#actmj="
