@@ -241,7 +241,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Redirect URLs
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-SITE_ID = 4
+SITE_ID = 5
 
 # EMAIL SETUP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
