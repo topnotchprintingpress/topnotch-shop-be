@@ -111,7 +111,7 @@ def submit_payment(request):
         "amount": amount,
         "metadata": {"user": email, "cart_items": cart_items,   "shipping_address": shipping
                      },
-        "callback_url": "http://localhost:3000/payment/success",
+        "callback_url": "http://topnotchprintingpress.com//payment/success",
     }
     url = "https://api.paystack.co/transaction/initialize"
     print("Payload sent to Paystack:", payload)
