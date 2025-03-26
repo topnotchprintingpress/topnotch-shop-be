@@ -233,7 +233,7 @@ EMAIL_HOST_PASSWORD = env('BREVO_MASTER_PASSWORD')
 DEFAULT_FROM_EMAIL = env('BREVO_FROM_EMAIL')
 
 # Base URL for the frontend
-FRONTEND_URL = 'http://localhost:3000'
+FRONTEND_URL = 'http://topnotchprintingpress.com'
 
 # dj-rest-auth settings
 REST_AUTH = {
@@ -242,7 +242,7 @@ REST_AUTH = {
     'JWT_AUTH_REFRESH_COOKIE': 'jwt-refresh-token',
     "JWT_AUTH_HTTPONLY": False,
     'PASSWORD_RESET_USE_SITES_DOMAIN': True,
-    'PASSWORD_RESET_CONFIRM_URL': 'http://localhost:3000/reset/confirm/{uid}/{token}/',
+    'PASSWORD_RESET_CONFIRM_URL': 'http://topnotchprintingpress.com/reset/confirm/{uid}/{token}/',
 }
 
 
