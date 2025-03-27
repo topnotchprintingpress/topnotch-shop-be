@@ -279,8 +279,8 @@ SIMPLE_JWT = {
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    'http://topnotchprintingpress.com',
-    'http://www.topnotchprintingpress.com'
+    'https://topnotchprintingpress.com',
+    'https://www.topnotchprintingpress.com'
 ]
 CORS_ALLOW_HEADERS = [
     "content-type",
