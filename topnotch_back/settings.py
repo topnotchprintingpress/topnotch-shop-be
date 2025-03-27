@@ -280,7 +280,8 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     'https://topnotchprintingpress.com',
-    'https://www.topnotchprintingpress.com'
+    'https://www.topnotchprintingpress.com',
+    "https://accounts.google.com",
 ]
 CORS_ALLOW_HEADERS = [
     "content-type",
@@ -307,6 +308,7 @@ CSRF_COOKIE_SAMESITE = 'None'
 CSRF_TRUSTED_ORIGINS = [
     'https://topnotchprintingpress.com',
     'https://www.topnotchprintingpress.com',
+    "https://accounts.google.com",
 ]
 
 # Allauth settings
