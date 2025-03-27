@@ -191,11 +191,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'offline'
         },
-        'APP': {
-            'client_id': env('GOOGLE_CLIENT_ID'),
-            'secret': env('GOOGLE_CLIENT_SECRET'),
-            'key': ''
-        }
+        'OAUTH_PKCE_ENABLED': True,
     }
 }
 
@@ -305,6 +301,8 @@ CORS_ALLOW_METHODS = [
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
 
 CSRF_TRUSTED_ORIGINS = [
     'https://topnotchprintingpress.com',
