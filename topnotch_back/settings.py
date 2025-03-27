@@ -34,7 +34,7 @@ PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY')
 PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['backend-topnotch-app-egsvd.ondigitalocean.app',
                  'www.backend-topnotch-app-egsvd.ondigitalocean.app', 'localhost', 'http://*.127.0.0.1', '127.0.0.1',]
