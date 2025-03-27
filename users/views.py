@@ -5,5 +5,5 @@ from dj_rest_auth.registration.views import SocialLoginView
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    callback_url = "http://topnotchprintingpress.com/api/auth/callback/google"
+    callback_url = "https://www.topnotchprintingpress.com/api/auth/callback/google"
     client_class = OAuth2Client
