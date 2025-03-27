@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import environ
 from datetime import timedelta
+from django.contrib.sites.models import Site
 
 env = environ.Env()
 environ.Env.read_env()
@@ -241,7 +242,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Redirect URLs
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-SITE_ID = 5
+
+CURRENT_DOMAIN = "www.topnotchprintingpress.com"
+
+try:
+    SITE_ID = Site.objects.get(domain=CURRENT_DOMAIN).id
+except Site.DoesNotExist:
+    SITE_ID = 5
 
 # EMAIL SETUP
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
