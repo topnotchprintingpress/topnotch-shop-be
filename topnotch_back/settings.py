@@ -185,10 +185,11 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
             'profile',
-            'email'
+            'email',
+            'openid'
         ],
         'AUTH_PARAMS': {
-            'access_type': 'online'
+            'access_type': 'offline'
         },
         'APP': {
             'client_id': env('GOOGLE_CLIENT_ID'),
