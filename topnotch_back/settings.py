@@ -37,7 +37,7 @@ PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ['backend-topnotch-app-egsvd.ondigitalocean.app',
-                 'www.backend-topnotch-app-egsvd.ondigitalocean.app', 'localhost', 'http://*.127.0.0.1', '127.0.0.1',]
+                 'www.backend-topnotch-app-egsvd.ondigitalocean.app', 'admin.topnotchprintingpress.com', 'www.admin.topnotchprintingpress.com', 'localhost', 'http://*.127.0.0.1', '127.0.0.1',]
 
 
 # Application definition
