@@ -80,7 +80,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         except ValueError:
             print("Invalid min_price or max_price value received")  # Debugging
 
-        return queryset.annotate(random_order=Random()).order_by('random_order')
+        return queryset
 
 
 class BannerViewSet(viewsets.ModelViewSet):
