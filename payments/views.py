@@ -62,7 +62,7 @@ def submit_payment(request):
         return JsonResponse({"status": "error", "message": "Amount is required"}, status=400)
 
     try:
-        amount = int(amount) * 100  # Ensure amount is an integer
+        amount = float(amount) * 100  # Ensure amount is an integer
     except ValueError:
         return JsonResponse({"status": "error", "message": "Invalid amount format"}, status=400)
 
