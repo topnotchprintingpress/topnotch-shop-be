@@ -6,6 +6,7 @@ from django.db.models import Q
 from .filters import ProductFilter
 from django.db.models import F, ExpressionWrapper, DecimalField, Value
 from django.db.models.functions import Coalesce
+from django.db.models.functions import Random
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -21,7 +22,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                         'main_category', 'discount', 'created_at']
 
     def get_queryset(self):
-        queryset = Product.objects.filter(status="PB").order_by()
+        queryset = Product.objects.filter(status="PB")
         slug = self.request.query_params.get("slug", None)
         if slug:
             filtered_queryset = queryset.filter(slug__iexact=slug)
@@ -41,7 +42,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         # If is_new_arrival is set, return all products ordered by created_at (ignore filters)
         if is_new_arrival:
-            return queryset
+            return queryset.order_by('-created_at')
 
         # Apply filters normally when is_new_arrival is not set
         if main_category:
@@ -79,7 +80,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         except ValueError:
             print("Invalid min_price or max_price value received")  # Debugging
 
-        return queryset
+        return queryset.annotate(random_order=Random()).order_by('random_order')
 
 
 class BannerViewSet(viewsets.ModelViewSet):
