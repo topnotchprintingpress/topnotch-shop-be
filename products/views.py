@@ -20,7 +20,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_fields = ['best_seller', 'slug', 'main_category', 'discount']
 
     def get_queryset(self):
-        queryset = Product.objects.filter(status="PB").order_by('-created_at')
+        queryset = Product.objects.filter(status="PB").order_by()
         slug = self.request.query_params.get("slug", None)
         if slug:
             filtered_queryset = queryset.filter(slug__iexact=slug)
