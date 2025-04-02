@@ -103,7 +103,7 @@ def submit_payment(request):
     ref = str(uuid.uuid4())
 
     headers = {
-        "Authorization": "Bearer sk_test_f0b9b5bbad4fd365f6a1f5652dd471d0acd12ffa",
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
         "Content-Type": "application/json",
     }
     payload = {
@@ -131,8 +131,7 @@ def process_payment(request):
     if not reference:
         return JsonResponse({'status': 'error', 'message': 'Reference is required'}, status=400)
 
-    headers = {
-        "Authorization": "Bearer sk_test_f0b9b5bbad4fd365f6a1f5652dd471d0acd12ffa"}
+    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
     url = f"https://api.paystack.co/transaction/verify/{reference}"
 
     try:
