@@ -22,8 +22,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Product.objects.filter(status="PB").order_by('-created_at')
         slug = self.request.query_params.get("slug", None)
-        print(f"Received slug: {slug}")
-        # Filter by slug if provided
         if slug:
             filtered_queryset = queryset.filter(slug__iexact=slug)
             # Debugging: Log the generated SQL query

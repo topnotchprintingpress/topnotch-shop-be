@@ -103,7 +103,7 @@ def submit_payment(request):
     ref = str(uuid.uuid4())
 
     headers = {
-        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        "Authorization": "Bearer sk_test_f0b9b5bbad4fd365f6a1f5652dd471d0acd12ffa",
         "Content-Type": "application/json",
     }
     payload = {
@@ -114,7 +114,6 @@ def submit_payment(request):
         "callback_url": "http://topnotchprintingpress.com//payment/success",
     }
     url = "https://api.paystack.co/transaction/initialize"
-    print("Payload sent to Paystack:", payload)
 
     try:
         response = requests.post(url, headers=headers, json=payload)
@@ -132,7 +131,8 @@ def process_payment(request):
     if not reference:
         return JsonResponse({'status': 'error', 'message': 'Reference is required'}, status=400)
 
-    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    headers = {
+        "Authorization": "Bearer sk_test_f0b9b5bbad4fd365f6a1f5652dd471d0acd12ffa"}
     url = f"https://api.paystack.co/transaction/verify/{reference}"
 
     try:
