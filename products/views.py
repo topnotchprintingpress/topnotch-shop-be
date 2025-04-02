@@ -17,7 +17,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
     filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['best_seller', 'slug']
+    filterset_fields = ['best_seller', 'slug', 'main_category', 'discount']
 
     def get_queryset(self):
         queryset = Product.objects.filter(status="PB").order_by('-created_at')
