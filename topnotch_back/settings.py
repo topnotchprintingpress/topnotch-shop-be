@@ -287,8 +287,6 @@ CORS_ALLOW_HEADERS = [
     'X-CSRFToken',
     'Access-Control-Allow-Origin',
     'x-user-email',
-
-    # Add other custom headers as needed
 ]
 
 CORS_ALLOW_METHODS = [
