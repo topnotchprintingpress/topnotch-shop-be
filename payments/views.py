@@ -111,7 +111,7 @@ def submit_payment(request):
         "amount": amount,
         "metadata": {"user": email, "cart_items": cart_items,   "shipping_address": shipping
                      },
-        "callback_url": "http://topnotchprintingpress.com//payment/success",
+        "callback_url": "https://topnotchprintingpress.com/payment/success",
     }
     url = "https://api.paystack.co/transaction/initialize"
 
@@ -131,7 +131,10 @@ def process_payment(request):
     if not reference:
         return JsonResponse({'status': 'error', 'message': 'Reference is required'}, status=400)
 
-    headers = {"Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}"}
+    headers = {
+        "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
     url = f"https://api.paystack.co/transaction/verify/{reference}"
 
     try:
